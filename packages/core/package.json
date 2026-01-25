@@ -1,6 +1,7 @@
 {
   "name": "@apercu/core",
   "version": "0.0.0",
+  "private": true,
   "files": [
     "dist"
   ],

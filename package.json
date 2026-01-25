@@ -9,6 +9,7 @@
     "fmt:check": "oxfmt --check ."
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.8",
     "@types/node": "^25.0.10",
     "oxfmt": "^0.26.0",
     "oxlint": "^0.16.6",
