@@ -17,7 +17,6 @@
     "build": "rolldown -c && tsc --emitDeclarationOnly"
   },
   "dependencies": {
-    "@apercu/core": "workspace:*",
     "@opentui/core": "^0.1.74"
   }
 }

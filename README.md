@@ -1,24 +1,6 @@
 # apercu
 
-A simple CLI tool.
-
-## Requirements
-
-- [Bun](https://bun.sh) >= 1.3.6
-
-## Installation
-
-```sh
-npm install -g apercu
-```
-
-## Usage
-
-```sh
-apercu help
-apercu version
-apercu tui
-```
+A diff-first review interface for Jujutsu.
 
 ## Development
 
