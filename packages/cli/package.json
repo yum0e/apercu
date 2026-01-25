@@ -1,6 +1,11 @@
 {
   "name": "apercu",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yum0e/apercu",
+    "directory": "packages/cli"
+  },
   "bin": {
     "apercu": "./dist/bin.js"
   },
