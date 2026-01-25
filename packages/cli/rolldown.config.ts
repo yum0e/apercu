@@ -5,6 +5,7 @@ export default defineConfig({
     bin: "src/bin.ts",
     index: "src/index.ts",
   },
+  platform: "node",
   output: {
     dir: "dist",
     format: "esm",
