@@ -59,7 +59,7 @@ async function runTui(): Promise<void> {
 }
 
 function printHelp(): void {
-  console.log(`apercu - A simple CLI tool
+  console.log(`apercu - A diff-first review interface for Jujutsu
 
 Usage: apercu <command>
 
