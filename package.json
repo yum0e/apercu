@@ -9,7 +9,7 @@
     "fmt:check": "oxfmt --check ."
   },
   "devDependencies": {
-    "@types/node": "^22.13.1",
+    "@types/node": "^25.0.10",
     "oxfmt": "^0.26.0",
     "oxlint": "^0.16.6",
     "rolldown": "^1.0.0-beta.6",
