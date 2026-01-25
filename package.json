@@ -1,0 +1,18 @@
+{
+  "name": "apercu",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "lint": "oxlint",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check ."
+  },
+  "devDependencies": {
+    "oxfmt": "^0.26.0",
+    "oxlint": "^0.16.6",
+    "rolldown": "^1.0.0-beta.6",
+    "typescript": "^5.7.3"
+  },
+  "packageManager": "pnpm@10.4.1"
+}
