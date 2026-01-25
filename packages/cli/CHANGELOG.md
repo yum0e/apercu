@@ -1,5 +1,11 @@
 # apercu
 
+## 0.0.3
+
+### Patch Changes
+
+- e836558: Update help tagline to match README
+
 ## 0.0.2
 
 ### Patch Changes
