@@ -29,9 +29,6 @@ importers:
 
   packages/cli:
     dependencies:
-      '@apercu/core':
-        specifier: workspace:*
-        version: link:../core
       '@opentui/core':
         specifier: ^0.1.74
         version: 0.1.74(stage-js@1.0.0-alpha.17)(typescript@5.9.3)(web-tree-sitter@0.25.10)
