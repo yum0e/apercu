@@ -2,6 +2,10 @@
 
 A simple CLI tool.
 
+## Requirements
+
+- [Bun](https://bun.sh) >= 1.3.6
+
 ## Installation
 
 ```sh
@@ -13,14 +17,16 @@ npm install -g apercu
 ```sh
 apercu help
 apercu version
+apercu tui
 ```
 
 ## Development
 
 ### Prerequisites
 
-- Node.js 24.13.0
-- pnpm
+- [Bun](https://bun.sh) >= 1.3.6
+- [pnpm](https://pnpm.io) >= 10
+- [jj](https://martinvonz.github.io/jj) (for version control)
 
 ### Setup
 
@@ -32,14 +38,7 @@ pnpm build
 ### Run locally
 
 ```sh
-node packages/cli/dist/bin.js --help
-```
-
-Or link it globally:
-
-```sh
-cd packages/cli && pnpm link --global
-apercu --help
+bun packages/cli/dist/bin.js --help
 ```
 
 ### Scripts
