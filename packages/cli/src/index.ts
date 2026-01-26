@@ -1,15 +1,15 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createCliRenderer, Text } from "@opentui/core";
+import { DiffViewerRuntime, DEMO_DIFF } from "./tui/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
 
-export function run(args: string[]): void {
+export async function run(args: string[]): Promise<void> {
   const command = args[0];
 
-  if (!command || command === "help" || command === "--help" || command === "-h") {
+  if (command === "help" || command === "--help" || command === "-h") {
     printHelp();
     return;
   }
@@ -19,53 +19,38 @@ export function run(args: string[]): void {
     return;
   }
 
-  if (command === "tui") {
-    runTui();
+  if (command && !command.startsWith("-")) {
+    console.error(`Unknown command: ${command}`);
+    console.error('Run "apercu help" for usage.');
+    process.exitCode = 1;
     return;
   }
 
-  console.error(`Unknown command: ${command}`);
-  console.error('Run "apercu help" for usage.');
-  process.exitCode = 1;
+  // Default: launch diff viewer with demo content
+  await runDiffViewer();
 }
 
-async function runTui(): Promise<void> {
-  const renderer = await createCliRenderer();
-
-  const title = Text({
-    content: `apercu v${pkg.version}`,
-    fg: "#888888",
-    position: "absolute",
-    left: 2,
-    top: 1,
-  });
-  renderer.root.add(title);
-
-  const hint = Text({
-    content: "Press 'q' or Escape to exit",
-    fg: "#666666",
-    position: "absolute",
-    left: 2,
-    top: 3,
-  });
-  renderer.root.add(hint);
-
-  renderer.keyInput.on("keypress", (key: { name: string }) => {
-    if (key.name === "escape" || key.name === "q") {
-      renderer.destroy();
-      process.exit(0);
-    }
-  });
+async function runDiffViewer(): Promise<void> {
+  const runtime = new DiffViewerRuntime(DEMO_DIFF);
+  await runtime.start();
 }
 
 function printHelp(): void {
-  console.log(`apercu - A diff-first review interface for Jujutsu
+  console.log(`apercu v${pkg.version} - A diff-first review interface for Jujutsu
 
-Usage: apercu <command>
+Usage: apercu [command]
 
 Commands:
-  tui                     Open the TUI
   help, -h, --help        Show this help message
   version, -v, --version  Show version
+
+Running apercu without arguments opens the diff viewer.
+
+Keyboard shortcuts (in diff viewer):
+  j / Down      Scroll down
+  k / Up        Scroll up
+  Ctrl+D        Page down
+  Ctrl+U        Page up
+  q / Escape    Quit
 `);
 }

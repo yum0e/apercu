@@ -19,6 +19,8 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
 
+      - uses: oven-sh/setup-bun@v2
+
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm lint
@@ -26,3 +28,5 @@ jobs:
       - run: pnpm fmt:check
 
       - run: pnpm build
+
+      - run: pnpm test

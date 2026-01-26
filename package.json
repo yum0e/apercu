@@ -4,6 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
+    "cli": "bun packages/cli/dist/bin.js",
+    "test": "bun test",
     "lint": "oxlint",
     "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check ."
