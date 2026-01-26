@@ -1,3 +1,5 @@
 node_modules
+apercu.tui.log
+apercu.tui.debug.log
 dist
 *.tsbuildinfo

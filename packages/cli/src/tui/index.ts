@@ -3,6 +3,9 @@ export * from "./events.js";
 export * from "./update.js";
 export * from "./view.js";
 export * from "./runtime.js";
+export * from "./diff.js";
+export * from "./focus.js";
+export * from "./layout.js";
 
 // 40 removed lines, 55 added lines = valid diff for scrolling test
 export const DEMO_DIFF = `--- a/src/database.ts
