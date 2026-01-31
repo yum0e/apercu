@@ -1,191 +1,106 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Effect, Exit } from "effect";
-import { ConfigError, Output, OutputLive, RpcError, runTail, type TailConfig } from "@apercu/core";
-import type { OutputFormat } from "@apercu/core";
+import { Args, Command, Options } from "@effect/cli";
+import { NodeContext, NodeRuntime } from "@effect/platform-node";
+import { Effect, Option } from "effect";
+import { pipe } from "effect/Function";
+import { Output, OutputLive, RpcError, runTail, type TailConfig } from "@apercu/core";
 import { ChainRpcLive } from "./rpc/chainRpc.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
 
-type Command = { type: "help" } | { type: "version" } | { type: "tail"; config: TailConfig };
+const addressArg = pipe(Args.text({ name: "address" }), Args.withDescription("Contract address"));
 
-export async function run(args: string[]): Promise<void> {
-  const program = Effect.gen(function* () {
-    const output = yield* Output;
-    const command = yield* parseArgs(args);
+const rpcUrlOption = pipe(Options.text("rpc"), Options.withDescription("WebSocket RPC endpoint"));
 
-    switch (command.type) {
-      case "help":
-        yield* output.stdout(helpText());
-        return;
-      case "version":
-        yield* output.stdout(`apercu ${pkg.version}`);
-        return;
-      case "tail":
-        yield* runTail(command.config).pipe(Effect.provide(ChainRpcLive(command.config.rpcUrl)));
-        return;
-    }
-  }).pipe(
-    Effect.catchAll((error) =>
-      Effect.gen(function* () {
-        const output = yield* Output;
-        yield* output.stderr(formatError(error));
-        return yield* Effect.fail(error);
-      }),
-    ),
-    Effect.provide(OutputLive),
-  );
+const topic0Option = pipe(
+  Options.text("topic0"),
+  Options.withDescription("Filter by event signature (topic0)"),
+  Options.optional,
+  Options.map(Option.getOrUndefined),
+);
 
-  const exit = await Effect.runPromiseExit(program);
-  if (Exit.isFailure(exit)) {
-    process.exitCode = 1;
-  }
-}
+const replayBlocksOption = pipe(
+  Options.integer("replay"),
+  Options.withAlias("n"),
+  Options.filterMap(
+    (value) => (value >= 0 ? Option.some(Math.floor(value)) : Option.none()),
+    "Replay must be a non-negative number",
+  ),
+  Options.withDescription("Replay last N blocks before following"),
+  Options.withDefault(0),
+);
 
-function parseArgs(args: string[]): Effect.Effect<Command, ConfigError> {
-  if (args.length === 0) {
-    return Effect.succeed({ type: "help" });
-  }
+const followOption = pipe(
+  Options.boolean("no-follow", { negationNames: ["follow", "f"] }),
+  Options.withDescription("Disable following new blocks"),
+  Options.map((noFollow) => !noFollow),
+);
 
-  if (args.some((arg) => arg === "-h" || arg === "--help")) {
-    return Effect.succeed({ type: "help" });
-  }
+const formatOption = pipe(
+  Options.choice("format", ["pretty", "jsonl"]),
+  Options.withDescription("Output format"),
+  Options.withDefault("pretty"),
+);
 
-  if (args.some((arg) => arg === "-v" || arg === "--version")) {
-    return Effect.succeed({ type: "version" });
-  }
+const command = pipe(
+  Command.make(
+    "apercu",
+    {
+      address: addressArg,
+      rpcUrl: rpcUrlOption,
+      topic0: topic0Option,
+      replayBlocks: replayBlocksOption,
+      follow: followOption,
+      format: formatOption,
+    },
+    (config) => {
+      const tailConfig: TailConfig = {
+        address: config.address as TailConfig["address"],
+        topic0: config.topic0 as TailConfig["topic0"],
+        rpcUrl: config.rpcUrl,
+        replayBlocks: config.replayBlocks,
+        follow: config.follow,
+        format: config.format,
+      };
 
-  let address: string | undefined;
-  let rpcUrl: string | undefined;
-  let topic0: string | undefined;
-  let replayBlocks = 0;
-  let follow = true;
-  let format: OutputFormat = "pretty";
+      return runTail(tailConfig).pipe(
+        Effect.catchAll((error) =>
+          Effect.gen(function* () {
+            const output = yield* Output;
+            yield* output.stderr(formatError(error));
+            return yield* Effect.fail(error);
+          }),
+        ),
+      );
+    },
+  ),
+  Command.withDescription("tail -f for EVM logs"),
+  Command.provide(OutputLive),
+  Command.provide((config) => ChainRpcLive(config.rpcUrl)),
+);
 
-  for (let i = 0; i < args.length; i += 1) {
-    const arg = args[i];
-    if (!arg) {
-      continue;
-    }
+const runCommand = Command.run({
+  name: "apercu",
+  version: pkg.version,
+});
 
-    switch (arg) {
-      case "--rpc": {
-        const value = args[i + 1];
-        if (!value) {
-          return Effect.fail(new ConfigError({ message: "--rpc expects a value" }));
-        }
-        rpcUrl = value;
-        i += 1;
-        break;
-      }
-      case "--topic0": {
-        const value = args[i + 1];
-        if (!value) {
-          return Effect.fail(new ConfigError({ message: "--topic0 expects a value" }));
-        }
-        topic0 = value;
-        i += 1;
-        break;
-      }
-      case "-n":
-      case "--replay": {
-        const value = args[i + 1];
-        i += 1;
-        const parsed = Number(value);
-        if (!Number.isFinite(parsed) || parsed < 0) {
-          return Effect.fail(
-            new ConfigError({ message: "-n/--replay expects a non-negative number" }),
-          );
-        }
-        replayBlocks = Math.floor(parsed);
-        break;
-      }
-      case "-f":
-      case "--follow": {
-        follow = true;
-        break;
-      }
-      case "--no-follow": {
-        follow = false;
-        break;
-      }
-      case "--format": {
-        const value = args[i + 1];
-        if (!value) {
-          return Effect.fail(new ConfigError({ message: "--format expects a value" }));
-        }
-        i += 1;
-        if (value === "pretty" || value === "jsonl") {
-          format = value;
-        } else {
-          return Effect.fail(new ConfigError({ message: "--format must be 'pretty' or 'jsonl'" }));
-        }
-        break;
-      }
-      default: {
-        if (arg.startsWith("-")) {
-          return Effect.fail(new ConfigError({ message: `Unknown option: ${arg}` }));
-        }
-        if (!address) {
-          address = arg;
-        } else {
-          return Effect.fail(new ConfigError({ message: `Unexpected argument: ${arg}` }));
-        }
-      }
-    }
-  }
-
-  if (!address) {
-    return Effect.fail(new ConfigError({ message: "Missing contract address" }));
-  }
-
-  if (!rpcUrl) {
-    return Effect.fail(new ConfigError({ message: "Missing --rpc WebSocket URL" }));
-  }
-
-  const config: TailConfig = {
-    address: address as TailConfig["address"],
-    topic0: topic0 as TailConfig["topic0"],
-    rpcUrl,
-    replayBlocks,
-    follow,
-    format,
-  };
-
-  return Effect.succeed({ type: "tail", config });
+export function run(args: ReadonlyArray<string>): void {
+  const program = runCommand(command)(args).pipe(Effect.provide(NodeContext.layer));
+  NodeRuntime.runMain(program, {
+    disableErrorReporting: true,
+    disablePrettyLogger: true,
+  });
 }
 
 function formatError(error: unknown): string {
-  if (error instanceof ConfigError || error instanceof RpcError) {
+  if (error instanceof RpcError) {
     return error.message;
   }
   if (error instanceof Error) {
     return error.message;
   }
   return String(error);
-}
-
-function helpText(): string {
-  return `apercu v${pkg.version} - tail -f for EVM contract logs
-
-Usage:
-  apercu <address> --rpc <wss://...> [options]
-
-Options:
-  --rpc <url>         WebSocket RPC endpoint
-  --topic0 <hash>     Filter by event signature (topic0)
-  -n, --replay <n>    Replay last N blocks before following
-  -f, --follow        Follow new blocks (default)
-  --no-follow         Fetch once and exit
-  --format <pretty|jsonl>
-  -h, --help          Show help
-  -v, --version       Show version
-
-Examples:
-  apercu 0xYourContract --rpc wss://...
-  apercu 0xYourContract --rpc wss://... -n 200
-  apercu 0xYourContract --rpc wss://... --format jsonl | jq
-`;
 }

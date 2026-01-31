@@ -18,8 +18,5 @@
   },
   "scripts": {
     "build": "rolldown -c && tsc --emitDeclarationOnly"
-  },
-  "dependencies": {
-    "effect": "^3.18.4"
   }
 }
