@@ -45,7 +45,7 @@ const formatOption = pipe(
   Options.withDefault("pretty"),
 );
 
-const command = pipe(
+const apercu = pipe(
   Command.make(
     "apercu",
     {
@@ -82,25 +82,32 @@ const command = pipe(
   Command.provide((config) => ChainRpcLive(config.rpcUrl)),
 );
 
-const runCommand = Command.run({
+const cli = Command.run(apercu, {
   name: "apercu",
   version: pkg.version,
 });
 
-export function run(argv: ReadonlyArray<string>): void {
-  const runtime = argv[0] ?? "node";
-  const script = argv[1] ?? "apercu";
-  const args = argv.slice(2);
-  const normalizedArgs = args.length === 0 ? ["--help"] : args;
-  const program = runCommand(command)([runtime, script, ...normalizedArgs]).pipe(
+cli(process.argv)
+  .pipe(
     Effect.provide(NodeContext.layer),
     Effect.provide(CliConfig.layer({ finalCheckBuiltIn: true })),
-  );
-  NodeRuntime.runMain(program, {
-    disableErrorReporting: true,
-    disablePrettyLogger: true,
-  });
-}
+  )
+  .pipe(Effect.runPromise);
+
+// export function run(argv: ReadonlyArray<string>): void {
+//   const runtime = argv[0] ?? "node";
+//   const script = argv[1] ?? "apercu";
+//   const args = argv.slice(2);
+//   const normalizedArgs = args.length === 0 ? ["--help"] : args;
+//   const program = runCommand(command)([runtime, script, ...normalizedArgs]).pipe(
+//     Effect.provide(NodeContext.layer),
+//     Effect.provide(CliConfig.layer({ finalCheckBuiltIn: true })),
+//   );
+//   NodeRuntime.runMain(program, {
+//     disableErrorReporting: true,
+//     disablePrettyLogger: true,
+//   });
+// }
 
 function formatError(error: unknown): string {
   if (error instanceof RpcError) {

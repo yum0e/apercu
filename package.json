@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
-    "cli": "node packages/cli/dist/bin.js",
+    "cli": "node packages/cli/dist/index.js",
     "test": "vitest run",
     "lint": "oxlint",
     "fmt": "oxfmt --write .",

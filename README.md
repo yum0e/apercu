@@ -43,7 +43,7 @@ pnpm build
 ### Run locally
 
 ```sh
-node packages/cli/dist/bin.js --help
+node packages/cli/dist/index.js --help
 ```
 
 ### Tests

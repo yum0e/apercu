@@ -7,7 +7,7 @@
     "directory": "packages/cli"
   },
   "bin": {
-    "apercu": "./dist/bin.js"
+    "apercu": "./dist/index.js"
   },
   "files": [
     "dist"

@@ -13,4 +13,4 @@ Verify workflow (fast):
 - `pnpm fmt`
 - `pnpm lint`
 - `pnpm test`
-- `node packages/cli/dist/bin.js --help`
+- `node packages/cli/dist/index.js --help`

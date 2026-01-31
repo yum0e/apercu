@@ -2,8 +2,7 @@ import { defineConfig } from "rolldown";
 
 export default defineConfig({
   input: {
-    bin: "src/bin.ts",
-    index: "src/index.ts",
+    main: "src/index.ts",
   },
   platform: "node",
   external: [/^@tevm\//, /^effect(\b|\/)/, "@apercu/core", "ws"],
