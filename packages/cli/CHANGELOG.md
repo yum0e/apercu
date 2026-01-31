@@ -1,5 +1,12 @@
 # apercu
 
+## 0.0.4
+
+### Patch Changes
+
+- 20b805f: working poc
+- 05b16ff: Render multi-file jj diffs with file navigation updates, add debug tooling, and update keybindings.
+
 ## 0.0.3
 
 ### Patch Changes
