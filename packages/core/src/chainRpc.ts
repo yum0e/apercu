@@ -8,7 +8,4 @@ export interface ChainRpcService {
   watchHeads: Stream.Stream<Head, RpcError>;
 }
 
-export class ChainRpc extends Context.Tag("@apercu/ChainRpc")<
-  ChainRpc,
-  ChainRpcService
->() {}
+export class ChainRpc extends Context.Tag("@apercu/ChainRpc")<ChainRpc, ChainRpcService>() {}

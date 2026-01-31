@@ -2,24 +2,14 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Effect, Exit } from "effect";
-import {
-  ConfigError,
-  Output,
-  OutputLive,
-  RpcError,
-  runTail,
-  type TailConfig,
-} from "@apercu/core";
+import { ConfigError, Output, OutputLive, RpcError, runTail, type TailConfig } from "@apercu/core";
 import type { OutputFormat } from "@apercu/core";
 import { ChainRpcLive } from "./rpc/chainRpc.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf-8"));
 
-type Command =
-  | { type: "help" }
-  | { type: "version" }
-  | { type: "tail"; config: TailConfig };
+type Command = { type: "help" } | { type: "version" } | { type: "tail"; config: TailConfig };
 
 export async function run(args: string[]): Promise<void> {
   const program = Effect.gen(function* () {
@@ -34,9 +24,7 @@ export async function run(args: string[]): Promise<void> {
         yield* output.stdout(`apercu ${pkg.version}`);
         return;
       case "tail":
-        yield* runTail(command.config).pipe(
-          Effect.provide(ChainRpcLive(command.config.rpcUrl))
-        );
+        yield* runTail(command.config).pipe(Effect.provide(ChainRpcLive(command.config.rpcUrl)));
         return;
     }
   }).pipe(
@@ -45,9 +33,9 @@ export async function run(args: string[]): Promise<void> {
         const output = yield* Output;
         yield* output.stderr(formatError(error));
         return yield* Effect.fail(error);
-      })
+      }),
     ),
-    Effect.provide(OutputLive)
+    Effect.provide(OutputLive),
   );
 
   const exit = await Effect.runPromiseExit(program);
@@ -107,7 +95,9 @@ function parseArgs(args: string[]): Effect.Effect<Command, ConfigError> {
         i += 1;
         const parsed = Number(value);
         if (!Number.isFinite(parsed) || parsed < 0) {
-          return Effect.fail(new ConfigError({ message: "-n/--replay expects a non-negative number" }));
+          return Effect.fail(
+            new ConfigError({ message: "-n/--replay expects a non-negative number" }),
+          );
         }
         replayBlocks = Math.floor(parsed);
         break;

@@ -45,9 +45,7 @@ export class WsRpcClient {
   private readonly subscriptions = new Map<string, SubscriptionHandler>();
   private readonly closeListeners = new Set<CloseListener>();
 
-  constructor(
-    private readonly url: string
-  ) {}
+  constructor(private readonly url: string) {}
 
   async request(method: string, params?: unknown[] | Record<string, unknown>): Promise<unknown> {
     await this.ensureOpen();
@@ -79,7 +77,7 @@ export class WsRpcClient {
     method: string,
     params: unknown[] | Record<string, unknown> | undefined,
     onMessage: SubscriptionHandler,
-    onClose: CloseListener
+    onClose: CloseListener,
   ): Promise<() => void> {
     await this.ensureOpen();
     const result = await this.request("eth_subscribe", params ? [method, params] : [method]);
@@ -149,7 +147,7 @@ export class WsRpcClient {
                 message: parsed.error.message,
                 code: parsed.error.code,
                 data: parsed.error.data,
-              })
+              }),
             );
             return;
           }

@@ -41,7 +41,7 @@ function normalizeLog(raw: Log): Log {
 function logsForBlock(
   rpc: ChainRpcService,
   filter: Omit<LogFilter, "fromBlock" | "toBlock">,
-  blockNumber: Hex
+  blockNumber: Hex,
 ): Effect.Effect<Log[], RpcError> {
   return rpc.getLogs({
     ...filter,
@@ -53,7 +53,7 @@ function logsForBlock(
 function replayStream(
   rpc: ChainRpcService,
   filter: Omit<LogFilter, "fromBlock" | "toBlock">,
-  replayBlocks: number
+  replayBlocks: number,
 ): Stream.Stream<TailEvent, RpcError> {
   if (replayBlocks <= 0) {
     return Stream.empty as Stream.Stream<TailEvent, RpcError>;
@@ -68,16 +68,16 @@ function replayStream(
         fromBlock,
         toBlock,
       });
-      const events = logs.map((log) => ({ type: "log", log: normalizeLog(log) } as TailEvent));
+      const events = logs.map((log) => ({ type: "log", log: normalizeLog(log) }) as TailEvent);
       return Stream.fromIterable(events);
-    })
+    }),
   );
 }
 
 function headsToEvents(
   rpc: ChainRpcService,
   filter: Omit<LogFilter, "fromBlock" | "toBlock">,
-  heads: Stream.Stream<Head, RpcError>
+  heads: Stream.Stream<Head, RpcError>,
 ): Stream.Stream<TailEvent, RpcError> {
   return Stream.unwrap(
     Effect.gen(function* () {
@@ -88,12 +88,13 @@ function headsToEvents(
           Effect.gen(function* () {
             const prev = yield* Ref.get(previous);
             yield* Ref.set(previous, head);
-            const reorg = prev && prev.hash !== head.parentHash
-              ? ({ type: "reorg", oldHead: prev, newHead: head } as TailEvent)
-              : null;
+            const reorg =
+              prev && prev.hash !== head.parentHash
+                ? ({ type: "reorg", oldHead: prev, newHead: head } as TailEvent)
+                : null;
             return { head, reorg };
-          })
-        )
+          }),
+        ),
       );
 
       const expanded = headWithReorg.pipe(
@@ -104,16 +105,16 @@ function headsToEvents(
           const logsStream = Stream.unwrap(
             Effect.map(logsForBlock(rpc, filter, head.number), (logs) =>
               Stream.fromIterable(
-                logs.map((log) => ({ type: "log", log: normalizeLog(log) } as TailEvent))
-              )
-            )
+                logs.map((log) => ({ type: "log", log: normalizeLog(log) }) as TailEvent),
+              ),
+            ),
           );
           return reorgStream.pipe(Stream.concat(logsStream));
-        })
+        }),
       );
 
       return expanded;
-    })
+    }),
   );
 }
 
@@ -134,7 +135,7 @@ export function tailStream(config: TailConfig): Stream.Stream<TailEvent, RpcErro
 
       const live = headsToEvents(rpc, baseFilter, rpc.watchHeads);
       return replay.pipe(Stream.concat(live));
-    })
+    }),
   );
 }
 
@@ -144,8 +145,6 @@ export function runTail(config: TailConfig): Effect.Effect<void, RpcError, Chain
   return Effect.gen(function* () {
     const output = yield* Output;
     const stream = tailStream(config);
-    yield* stream.pipe(
-      Stream.runForEach((event) => output.stdout(format(event)))
-    );
+    yield* stream.pipe(Stream.runForEach((event) => output.stdout(format(event))));
   });
 }

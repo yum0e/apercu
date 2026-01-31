@@ -24,8 +24,6 @@ export interface LogFilter {
   toBlock: Hex;
 }
 
-export type TailEvent =
-  | { type: "log"; log: Log }
-  | { type: "reorg"; oldHead: Head; newHead: Head };
+export type TailEvent = { type: "log"; log: Log } | { type: "reorg"; oldHead: Head; newHead: Head };
 
 export type OutputFormat = "pretty" | "jsonl";

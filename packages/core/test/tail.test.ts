@@ -54,14 +54,14 @@ describe("tailStream", () => {
       const result = yield* tailStream(config).pipe(
         Stream.runCollect,
         Effect.map(Chunk.toReadonlyArray),
-        Effect.provide(rpcLayer)
+        Effect.provide(rpcLayer),
       );
 
       expect(result).toEqual([
         { type: "log", log: logs[0] },
         { type: "log", log: logs[1] },
       ]);
-    })
+    }),
   );
 
   it.effect("emits reorg notices before logs for the reorged head", () =>
@@ -87,7 +87,7 @@ describe("tailStream", () => {
       const result = yield* tailStream(config).pipe(
         Stream.runCollect,
         Effect.map(Chunk.toReadonlyArray),
-        Effect.provide(rpcLayer)
+        Effect.provide(rpcLayer),
       );
 
       expect(result).toEqual([
@@ -95,7 +95,7 @@ describe("tailStream", () => {
         { type: "reorg", oldHead: head1, newHead: head2 },
         { type: "log", log: logsByBlock["0x2"][0] },
       ]);
-    })
+    }),
   );
 });
 
@@ -121,14 +121,11 @@ describe("runTail", () => {
         follow: false,
       };
 
-      yield* runTail(config).pipe(
-        Effect.provide(rpcLayer),
-        Effect.provide(outputLayer)
-      );
+      yield* runTail(config).pipe(Effect.provide(rpcLayer), Effect.provide(outputLayer));
 
       const lines = yield* Ref.get(linesRef);
       expect(lines).toHaveLength(1);
       expect(lines[0]).toContain("block=0x1");
-    })
+    }),
   );
 });

@@ -1,12 +1,6 @@
 import { Duration, Effect, Layer, Schedule, Stream } from "effect";
 import * as Rpc from "@tevm/voltaire/jsonrpc";
-import {
-  ChainRpc,
-  RpcError,
-  type Head,
-  type Log,
-  type LogFilter,
-} from "@apercu/core";
+import { ChainRpc, RpcError, type Head, type Log, type LogFilter } from "@apercu/core";
 import { WsRpcClient } from "./wsClient.js";
 
 const RETRY_SCHEDULE = Schedule.exponential(Duration.millis(250));
@@ -97,7 +91,7 @@ export const ChainRpcLive = (rpcUrl: string) =>
                   return;
                 }
                 emit.fail(error);
-              }
+              },
             );
           } catch (error) {
             if (active) {
@@ -123,5 +117,5 @@ export const ChainRpcLive = (rpcUrl: string) =>
         getLogs,
         watchHeads,
       };
-    })
+    }),
   );
