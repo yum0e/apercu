@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { Args, Command, Options } from "@effect/cli";
+import { Args, CliConfig, Command, Options } from "@effect/cli";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { Effect, Option } from "effect";
 import { pipe } from "effect/Function";
@@ -87,9 +87,15 @@ const runCommand = Command.run({
   version: pkg.version,
 });
 
-export function run(args: ReadonlyArray<string>): void {
+export function run(argv: ReadonlyArray<string>): void {
+  const runtime = argv[0] ?? "node";
+  const script = argv[1] ?? "apercu";
+  const args = argv.slice(2);
   const normalizedArgs = args.length === 0 ? ["--help"] : args;
-  const program = runCommand(command)(normalizedArgs).pipe(Effect.provide(NodeContext.layer));
+  const program = runCommand(command)([runtime, script, ...normalizedArgs]).pipe(
+    Effect.provide(NodeContext.layer),
+    Effect.provide(CliConfig.layer({ finalCheckBuiltIn: true })),
+  );
   NodeRuntime.runMain(program, {
     disableErrorReporting: true,
     disablePrettyLogger: true,
