@@ -88,7 +88,8 @@ const runCommand = Command.run({
 });
 
 export function run(args: ReadonlyArray<string>): void {
-  const program = runCommand(command)(args).pipe(Effect.provide(NodeContext.layer));
+  const normalizedArgs = args.length === 0 ? ["--help"] : args;
+  const program = runCommand(command)(normalizedArgs).pipe(Effect.provide(NodeContext.layer));
   NodeRuntime.runMain(program, {
     disableErrorReporting: true,
     disablePrettyLogger: true,
