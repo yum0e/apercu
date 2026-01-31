@@ -6,10 +6,10 @@ export default defineConfig({
     index: "src/index.ts",
   },
   platform: "node",
-  external: [/^@opentui\//],
+  external: [/^@tevm\//, /^effect(\b|\/)/, "@apercu/core", "ws"],
   output: {
     dir: "dist",
     format: "esm",
-    banner: (chunk) => (chunk.name === "bin" ? "#!/usr/bin/env bun" : ""),
+    banner: (chunk) => (chunk.name === "bin" ? "#!/usr/bin/env node" : ""),
   },
 });

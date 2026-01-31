@@ -17,6 +17,9 @@
     "build": "rolldown -c && tsc --emitDeclarationOnly"
   },
   "dependencies": {
-    "@opentui/core": "^0.1.74"
+    "@apercu/core": "workspace:*",
+    "@tevm/voltaire": "^0.2.28",
+    "effect": "^3.18.4",
+    "ws": "^8.18.3"
   }
 }
