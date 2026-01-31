@@ -10,5 +10,7 @@ Always run `pnpm build` before committing to ensure the build passes.
 
 Verify workflow (fast):
 
+- `pnpm fmt`
+- `pnpm lint`
 - `pnpm test`
 - `node packages/cli/dist/bin.js --help`
