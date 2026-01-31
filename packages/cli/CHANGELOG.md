@@ -1,5 +1,11 @@
 # apercu
 
+## 0.0.5
+
+### Patch Changes
+
+- 894ff5d: allow arbitrary options and arguments sorting
+
 ## 0.0.4
 
 ### Patch Changes
